@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
 import { UpdateNftDto } from './dto/update-nft.dto';
-import { Client, Wallet, convertStringToHex } from 'xrpl';
+import { Client, Wallet, convertStringToHex, NFTokenMint } from 'xrpl';
 import NftMetadata from './entities/NftMetadata.entity';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class NftService {
       url: createNftDto.picture,
     };
 
-    const transactionJson = {
+    const transactionJson: NFTokenMint = {
       TransactionType: 'NFTokenMint',
       Account: standby_wallet.classicAddress,
       URI: convertStringToHex(JSON.stringify(nftMetadata)),
