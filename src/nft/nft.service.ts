@@ -8,7 +8,7 @@ import {
   NFTokenMint,
   AMMInfoRequest,
 } from 'xrpl';
-import NftMetadata from './entities/NftMetadata.entity';
+import { NftMetadata } from './entities/nft.entity';
 
 @Injectable()
 export class NftService {

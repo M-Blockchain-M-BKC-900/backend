@@ -4,3 +4,9 @@ export class Nft {
   text: string;
   picture: string;
 }
+
+export interface NftMetadata {
+  title: string;
+  description: string;
+  url: string;
+}
