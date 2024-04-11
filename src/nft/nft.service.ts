@@ -1,20 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
-import {
-  Client,
-  Wallet,
-  convertStringToHex,
-  NFTokenMint,
-  AMMInfoRequest,
-} from 'xrpl';
+import * as xrpl from 'xrpl';
 import { NftMetadata } from './entities/nft.entity';
 
 @Injectable()
 export class NftService {
   async create(createNftDto: CreateNftDto) {
     const net = 'wss://s.altnet.rippletest.net:51233';
-    const standby_wallet = Wallet.fromSeed(createNftDto.seed);
-    const client = new Client(net);
+    const standby_wallet = xrpl.Wallet.fromSeed(createNftDto.seed);
+    const client = new xrpl.Client(net);
     await client.connect();
 
     const nftMetadata: NftMetadata = {
@@ -23,10 +17,10 @@ export class NftService {
       url: createNftDto.picture,
     };
 
-    const transactionJson: NFTokenMint = {
+    const transactionJson: xrpl.NFTokenMint = {
       TransactionType: 'NFTokenMint',
       Account: standby_wallet.classicAddress,
-      URI: convertStringToHex(JSON.stringify(nftMetadata)),
+      URI: xrpl.convertStringToHex(JSON.stringify(nftMetadata)),
       Flags: 8,
       TransferFee: 20000,
       NFTokenTaxon: 0,
@@ -36,21 +30,37 @@ export class NftService {
       wallet: standby_wallet,
     });
 
-    const nfts = await client.request(<AMMInfoRequest>{
-      method: 'account_nfts',
-      account: standby_wallet.classicAddress,
-      command: 'amm_info',
-    });
-
-    console.log('Transaction result:', tx.result);
-    console.log('nfts:', nfts);
     client.disconnect();
 
     return tx.result;
   }
 
-  findAll() {
-    return `This action returns all nft`;
+  async findAll(seed: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(seed);
+    const net = "wss://s.altnet.rippletest.net:51233";
+    const client = new xrpl.Client(net);
+    await client.connect();
+
+    const nfts: xrpl.AccountNFTsResponse = await client.request({
+      command: "account_nfts",
+      account: standby_wallet.classicAddress
+    });
+
+    let results = '';
+
+    nfts.result.account_nfts.forEach(nft => {
+      const metadataJson: string = JSON.stringify(nft.URI);
+      try {
+        const metadata: any = JSON.parse(metadataJson);
+        results += `\nNFT ID: ${nft.NFTokenID}, metadata: ${JSON.stringify(metadata, null, 2)}`;
+      } catch (e) {
+        results += `\nNFT ID: ${nft.NFTokenID}, Error parsing metadata: ${e.message}`;
+      }
+    });
+
+    console.log('NFTs:', results);
+
+    client.disconnect();
   }
 
   findOne(id: number) {

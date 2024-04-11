@@ -18,17 +18,17 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
   @Post()
   create(@Body() createNftDto: CreateNftDto) {
     return this.nftService.create(createNftDto);
   }
 
-  @Get()
-  findAll() {
-    return this.nftService.findAll();
+  @Get(':seed')
+  findAll(@Param('seed') seed: string) {
+    return this.nftService.findAll(seed);
   }
 
   @Get(':id')
