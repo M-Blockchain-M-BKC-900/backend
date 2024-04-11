@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
 import { UpdateNftDto } from './dto/update-nft.dto';
 import { Client, Wallet, convertStringToHex } from 'xrpl';
-import NftMetadata from './dto/NftMetadata.dto';
+import NftMetadata from './entities/NftMetadata.entity';
 
 @Injectable()
 export class NftService {
