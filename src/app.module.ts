@@ -4,10 +4,9 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { NftModule } from './nft/nft.module';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), NftModule, AuthModule, UsersModule],
+  imports: [ConfigModule.forRoot(), NftModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

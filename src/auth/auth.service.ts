@@ -1,17 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { Wallet } from 'xrpl';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private jwtService: JwtService) {}
 
   async signIn(seed: string): Promise<{ access_token: string }> {
-    if (!(await this.usersService.check(seed)))
+    try {
+      Wallet.fromSeed(seed);
+    } catch (error) {
       throw new UnauthorizedException();
+    }
     const payload = { seed: seed };
     return {
       access_token: await this.jwtService.signAsync(payload),

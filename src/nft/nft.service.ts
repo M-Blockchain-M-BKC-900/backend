@@ -37,18 +37,18 @@ export class NftService {
 
   async findAll(seed: string) {
     const standby_wallet = xrpl.Wallet.fromSeed(seed);
-    const net = "wss://s.altnet.rippletest.net:51233";
+    const net = 'wss://s.altnet.rippletest.net:51233';
     const client = new xrpl.Client(net);
     await client.connect();
 
     const nfts: xrpl.AccountNFTsResponse = await client.request({
-      command: "account_nfts",
-      account: standby_wallet.classicAddress
+      command: 'account_nfts',
+      account: standby_wallet.classicAddress,
     });
 
     let results = '';
 
-    nfts.result.account_nfts.forEach(nft => {
+    nfts.result.account_nfts.forEach((nft) => {
       const metadataJson: string = JSON.stringify(nft.URI);
       try {
         const metadata: any = JSON.parse(metadataJson);
