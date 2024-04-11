@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
-import { UpdateNftDto } from './dto/update-nft.dto';
 import {
   Client,
   Wallet,
@@ -36,6 +35,7 @@ export class NftService {
     const tx = await client.submitAndWait(transactionJson, {
       wallet: standby_wallet,
     });
+
     const nfts = await client.request(<AMMInfoRequest>{
       method: 'account_nfts',
       account: standby_wallet.classicAddress,
@@ -46,7 +46,7 @@ export class NftService {
     console.log('nfts:', nfts);
     client.disconnect();
 
-    return 'This action adds a new nft';
+    return tx.result;
   }
 
   findAll() {
@@ -55,10 +55,6 @@ export class NftService {
 
   findOne(id: number) {
     return `This action returns a #${id} nft`;
-  }
-
-  update(id: number, updateNftDto: UpdateNftDto) {
-    return `This action updates a #${id} nft`;
   }
 
   remove(id: number) {
