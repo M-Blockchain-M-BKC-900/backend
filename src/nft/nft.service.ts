@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
 import { UpdateNftDto } from './dto/update-nft.dto';
-import { Client, Wallet, convertStringToHex, NFTokenMint } from 'xrpl';
+import {
+  Client,
+  Wallet,
+  convertStringToHex,
+  NFTokenMint,
+  AMMInfoRequest,
+} from 'xrpl';
 import NftMetadata from './entities/NftMetadata.entity';
 
 @Injectable()
@@ -30,9 +36,10 @@ export class NftService {
     const tx = await client.submitAndWait(transactionJson, {
       wallet: standby_wallet,
     });
-    const nfts = await client.request({
+    const nfts = await client.request(<AMMInfoRequest>{
       method: 'account_nfts',
       account: standby_wallet.classicAddress,
+      command: 'amm_info',
     });
 
     console.log('Transaction result:', tx.result);
