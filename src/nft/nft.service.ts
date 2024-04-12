@@ -39,8 +39,10 @@ export class NftService {
     return tx.result;
   }
 
-  async findAll(seed: string) {
-    const standby_wallet = xrpl.Wallet.fromSeed(seed);
+  async findAll(token: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
     const net = 'wss://s.altnet.rippletest.net:51233';
     const client = new xrpl.Client(net);
     await client.connect();

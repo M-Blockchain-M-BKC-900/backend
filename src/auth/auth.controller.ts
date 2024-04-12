@@ -18,6 +18,7 @@ export class AuthController {
     return this.authService.signIn(body.seed);
   }
 
+  @HttpCode(HttpStatus.OK)
   @Get('create')
   create() {
     return this.authService.create();

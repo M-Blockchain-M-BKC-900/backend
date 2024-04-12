@@ -28,16 +28,26 @@ export class NftController {
     return this.nftService.create(createNftDto, token);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get(':id')
-  findAll(@Param('id') seed: string) {
-    return this.nftService.findAll(seed);
+  findAll(@Headers() headers: any) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.findAll(token);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.nftService.findOne(+id);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.nftService.remove(+id);

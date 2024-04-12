@@ -5,10 +5,6 @@ export default class CreateNftDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  seed: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
   title: string;
   @IsString()
   @IsNotEmpty()
