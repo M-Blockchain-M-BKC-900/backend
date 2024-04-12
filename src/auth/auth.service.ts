@@ -25,7 +25,9 @@ export class AuthService {
 
   async create(): Promise<any> {
     const { data } = await firstValueFrom(
-      this.httpService.post('https://faucet.altnet.rippletest.net/accounts'),
+      this.httpService.post(
+        'https://faucet.' + process.env.NFT_ENV + '.rippletest.net/accounts',
+      ),
     );
     return data;
   }

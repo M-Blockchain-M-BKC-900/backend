@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 export class NftService {
   constructor(private jwtService: JwtService) {}
   async create(createNftDto: CreateNftDto, token: string) {
-    const net = 'wss://s.altnet.rippletest.net:51233';
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
     const standby_wallet = xrpl.Wallet.fromSeed(
       this.jwtService.decode(token).seed,
     );
@@ -43,7 +43,7 @@ export class NftService {
     const standby_wallet = xrpl.Wallet.fromSeed(
       this.jwtService.decode(token).seed,
     );
-    const net = 'wss://s.altnet.rippletest.net:51233';
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
     const client = new xrpl.Client(net);
     await client.connect();
 
