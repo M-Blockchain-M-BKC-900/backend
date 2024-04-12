@@ -53,7 +53,6 @@ export class NftService {
     });
 
     let results: any = [];
-    console.log("nfts: ", nfts.result);
 
     nfts.result.account_nfts.forEach((nft) => {
       const metadataJson: string = hexToString(nft.URI || '');
@@ -91,8 +90,6 @@ export class NftService {
       account: standby_wallet.classicAddress,
     });
 
-    console.log("nfts: ", nfts.result);
-
     for (let nft of nfts.result.account_nfts) {
       if (nft.NFTokenID === NFT_ID) {
         try {
@@ -119,8 +116,24 @@ export class NftService {
   }
 
 
-  remove(id: number) {
-    return `This action removes a #${id} nft`;
+  async remove(token: string, NFT_ID: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+  
+    const transactionBlob: xrpl.NFTokenBurn = {
+      "TransactionType": "NFTokenBurn",
+      "Account": standby_wallet.classicAddress,
+      "NFTokenID": NFT_ID
+    };
+
+    const tx = await client.submitAndWait(transactionBlob, { wallet: standby_wallet });
+  
+    client.disconnect();
+    return tx.result;
   }
 }
 

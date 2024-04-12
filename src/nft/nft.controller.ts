@@ -50,7 +50,8 @@ export class NftController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.nftService.remove(+id);
+  remove(@Headers() headers: any, @Param('id') id: string) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.remove(token, id);
   }
 }
