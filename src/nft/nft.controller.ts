@@ -31,7 +31,7 @@ export class NftController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Get(':id')
+  @Get()
   findAll(@Headers() headers: any) {
     const token = headers.authorization?.split(' ')[1];
     return this.nftService.findAll(token);
