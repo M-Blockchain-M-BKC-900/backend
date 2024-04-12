@@ -41,8 +41,9 @@ export class NftController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.nftService.findOne(+id);
+  findOne(@Headers() headers: any, @Param('id') id: string) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.findOne(token, id);
   }
 
   @HttpCode(HttpStatus.OK)

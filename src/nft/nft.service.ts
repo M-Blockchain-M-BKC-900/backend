@@ -52,27 +52,72 @@ export class NftService {
       account: standby_wallet.classicAddress,
     });
 
-    let results = '';
+    let results: any = [];
+    console.log("nfts: ", nfts.result);
 
     nfts.result.account_nfts.forEach((nft) => {
       const metadataJson: string = hexToString(nft.URI || '');
-      console.log('metadataJson:', metadataJson);
+
       try {
         const metadata: any = JSON.parse(metadataJson);
-        results += `\nNFT ID: ${nft.NFTokenID}, metadata: ${JSON.stringify(metadata, null, 2)}`;
+        results.push({
+          NFT_ID: nft.NFTokenID,
+          metadata: metadata
+        });
       } catch (e) {
-        results += `\nNFT ID: ${nft.NFTokenID}, Error parsing metadata: ${e.message}`;
+        results.push({
+          NFT_ID: nft.NFTokenID,
+          error: `Error parsing metadata: ${e.message}`
+        });
       }
     });
 
     client.disconnect();
 
-    return results;
+    return JSON.stringify(results, null, 2);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} nft`;
+
+  async findOne(token: string, NFT_ID: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+
+    const nfts: xrpl.AccountNFTsResponse = await client.request({
+      command: 'account_nfts',
+      account: standby_wallet.classicAddress,
+    });
+
+    console.log("nfts: ", nfts.result);
+
+    for (let nft of nfts.result.account_nfts) {
+      if (nft.NFTokenID === NFT_ID) {
+        try {
+          const metadataJson: string = hexToString(nft.URI || '');
+          const metadata = JSON.parse(metadataJson);
+          client.disconnect();
+          return JSON.stringify({
+            NFT_ID: nft.NFTokenID,
+            metadata: metadata
+          }, null, 2);
+        } catch (e) {
+          client.disconnect();
+          return JSON.stringify({
+            NFT_ID: nft.NFTokenID,
+            error: `Error parsing metadata: ${e.message}`
+          }, null, 2);
+        }
+      }
+    }
+
+    client.disconnect();
+
+    return JSON.stringify({ error: "NFT not found with the provided ID." }, null, 2);
   }
+
 
   remove(id: number) {
     return `This action removes a #${id} nft`;
