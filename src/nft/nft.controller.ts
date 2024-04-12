@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { NftService } from './nft.service';
 import CreateNftDto from './dto/create-nft.dto';
@@ -18,16 +19,17 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
-  // @HttpCode(HttpStatus.OK)
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createNftDto: CreateNftDto) {
-    return this.nftService.create(createNftDto);
+  create(@Headers() headers: any, @Body() createNftDto: CreateNftDto) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.create(createNftDto, token);
   }
 
-  @Get(':seed')
-  findAll(@Param('seed') seed: string) {
+  @Get(':id')
+  findAll(@Param('id') seed: string) {
     return this.nftService.findAll(seed);
   }
 

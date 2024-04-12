@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
 import * as xrpl from 'xrpl';
 import { NftMetadata } from './entities/nft.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class NftService {
-  async create(createNftDto: CreateNftDto) {
+  constructor(private jwtService: JwtService) {}
+  async create(createNftDto: CreateNftDto, token: string) {
     const net = 'wss://s.altnet.rippletest.net:51233';
-    const standby_wallet = xrpl.Wallet.fromSeed(createNftDto.seed);
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
     const client = new xrpl.Client(net);
     await client.connect();
 
