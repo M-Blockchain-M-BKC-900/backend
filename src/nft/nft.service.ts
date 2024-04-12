@@ -55,7 +55,8 @@ export class NftService {
     let results = '';
 
     nfts.result.account_nfts.forEach((nft) => {
-      const metadataJson: string = JSON.stringify(nft.URI);
+      const metadataJson: string = hexToString(nft.URI || '');
+      console.log('metadataJson:', metadataJson);
       try {
         const metadata: any = JSON.parse(metadataJson);
         results += `\nNFT ID: ${nft.NFTokenID}, metadata: ${JSON.stringify(metadata, null, 2)}`;
@@ -64,9 +65,9 @@ export class NftService {
       }
     });
 
-    console.log('NFTs:', results);
-
     client.disconnect();
+
+    return results;
   }
 
   findOne(id: number) {
@@ -76,4 +77,12 @@ export class NftService {
   remove(id: number) {
     return `This action removes a #${id} nft`;
   }
+}
+
+function hexToString(hex: string): string {
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return str;
 }
