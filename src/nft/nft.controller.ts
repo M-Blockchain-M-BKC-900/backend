@@ -90,4 +90,13 @@ export class NftController {
     const token = headers.authorization?.split(' ')[1];
     return this.nftService.createBuyOffer(token, body.wallet_dest, body.NFT_ID, body.price);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('acceptBuyOffer')
+  acceptBuyOffer(@Headers() headers: any, @Body() body: { NFT_OFFER: string }) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.acceptBuyOffer(token, body.NFT_OFFER);
+  }
 }

@@ -290,6 +290,35 @@ export class NftService {
     return await this.findOffer('', tx.result.NFTokenID);
   }
 
+  async acceptBuyOffer(token: string, NFT_OFFER: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+
+    const transactionBlob: xrpl.NFTokenAcceptOffer = {
+      "TransactionType": "NFTokenAcceptOffer",
+      "Account": standby_wallet.classicAddress,
+      "NFTokenBuyOffer": NFT_OFFER
+    };
+
+    const tx = await client.submitAndWait(transactionBlob, { wallet: standby_wallet });
+    console.log("tx result: ", JSON.stringify(tx.result, null, 2));
+
+    const nfts = await client.request({
+      command: "account_nfts",
+      account: standby_wallet.classicAddress  
+    });
+    console.log("nfts: ", JSON.stringify(nfts, null, 2));
+
+    // Vérifier les résultats de la transaction
+    // console.log(await this.findOffer('', tx.result.NFTokenID));
+
+    client.disconnect();
+    // return tx.result;
+  }
 }
 
 function hexToString(hex: string): string {
