@@ -4,6 +4,14 @@ import * as xrpl from 'xrpl';
 import { NftMetadata } from './entities/nft.entity';
 import { JwtService } from '@nestjs/jwt';
 
+interface NftWithMetadata {
+  NFT_ID: string;
+  metadata: {
+      title: string;
+      description: string;
+      url: string;
+  };
+}
 @Injectable()
 export class NftService {
   constructor(private jwtService: JwtService) {}
@@ -123,7 +131,7 @@ export class NftService {
     return tx.result;
   }
 
-  async findAll(token: string) {
+  async findAll(token: string): Promise<[NftWithMetadata]> {
     const standby_wallet = xrpl.Wallet.fromSeed(
       this.jwtService.decode(token).seed,
     );
@@ -157,7 +165,7 @@ export class NftService {
 
     client.disconnect();
 
-    return JSON.stringify(results, null, 2);
+    return results
   }
 
 
@@ -219,6 +227,69 @@ export class NftService {
     client.disconnect();
     return tx.result;
   }
+
+  async findAllOffers(token: string) {
+    const nfts = await this.findAll(token);
+    let allOffers = [];
+
+    for (const nft of nfts) {
+      const offer = await this.findOffer(token, nft.NFT_ID);
+      allOffers.push({
+          NFT_ID: nft.NFT_ID,
+          offer: offer ? offer : "No buy offers."
+      });
+    }
+
+    return JSON.stringify(allOffers, null, 2);
+  }
+
+  async findOffer(token: string, NFT_ID: string): Promise<any> {
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+  
+    try {
+      const response = await client.request({
+        command: "nft_buy_offers",
+        nft_id: NFT_ID
+      });
+
+      if (response && response.result && response.result.offers && response.result.offers.length > 0) {
+        return response.result.offers;
+      }
+    } catch (err) {
+      console.error(``);
+    } finally {
+      client.disconnect();
+    }
+
+    return "No buy offers.";
+  }
+
+  async createBuyOffer(token: string, wallet_dest: string, NFT_ID: string, price: string) {
+    const standby_wallet = xrpl.Wallet.fromSeed(
+      this.jwtService.decode(token).seed,
+    );
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+
+    const transactionBlob: xrpl.NFTokenCreateOffer = {
+      "TransactionType": "NFTokenCreateOffer",
+      "Account": standby_wallet.classicAddress,
+      "Owner": wallet_dest,
+      "NFTokenID": NFT_ID,
+      "Amount": price,
+      "Flags": undefined
+    };
+
+    const tx = await client.submitAndWait(transactionBlob, { wallet: standby_wallet });
+
+    client.disconnect();
+
+    return await this.findOffer('', tx.result.NFTokenID);
+  }
+
 }
 
 function hexToString(hex: string): string {

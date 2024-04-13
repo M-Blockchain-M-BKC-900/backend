@@ -40,9 +40,10 @@ export class NftController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('findAll')
-  findAll(@Headers() headers: any) {
+  async findAll(@Headers() headers: any) {
     const token = headers.authorization?.split(' ')[1];
-    return this.nftService.findAll(token);
+
+    return JSON.stringify(await this.nftService.findAll(token));
   }
 
   @HttpCode(HttpStatus.OK)
@@ -61,5 +62,32 @@ export class NftController {
   remove(@Headers() headers: any, @Body() body: { id: string }) {
     const token = headers.authorization?.split(' ')[1];
     return this.nftService.remove(token, body.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('findOffer')
+  findOffer(@Headers() headers: any, @Body() body: { NFT_ID: string }) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.findOffer(token, body.NFT_ID);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('findAllOffers')
+  findAllOffers(@Headers() headers: any) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.findAllOffers(token);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('createBuyOffer')
+  createBuyOffer(@Headers() headers: any, @Body() body: { wallet_dest: string, NFT_ID: string, price: string }) {
+    const token = headers.authorization?.split(' ')[1];
+    return this.nftService.createBuyOffer(token, body.wallet_dest, body.NFT_ID, body.price);
   }
 }
