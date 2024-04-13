@@ -7,6 +7,90 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class NftService {
   constructor(private jwtService: JwtService) {}
+
+  async createNFTsForWallet(wallet: xrpl.Wallet, nftData: CreateNftDto[]): Promise<any[]> {
+    const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+    const client = new xrpl.Client(net);
+    await client.connect();
+  
+    let nfts = [];
+    for (const data of nftData) {
+      const nftMetadata: NftMetadata = {
+        title: data.title,
+        description: data.text,
+        url: data.picture,
+      };
+  
+      const transactionJson: xrpl.NFTokenMint = {
+        TransactionType: 'NFTokenMint',
+        Account: wallet.classicAddress,
+        URI: xrpl.convertStringToHex(JSON.stringify(nftMetadata)),
+        Flags: xrpl.NFTokenMintFlags.tfTransferable + xrpl.NFTokenMintFlags.tfBurnable,
+        TransferFee: 20000,
+        NFTokenTaxon: 0,
+      };
+  
+      const tx = await client.submitAndWait(transactionJson, {
+        wallet: wallet,
+      });
+  
+      nfts.push({
+        NFT_ID: tx.result.hash,
+        metadata: nftMetadata
+      });
+    }
+  
+    client.disconnect();
+    return nfts;
+  }
+  
+
+  async marketplace() {
+    const wallet1 = await getAccount();
+    const wallet2 = await getAccount();
+  
+    const nftImages1 = [
+      "https://img.freepik.com/photos-gratuite/sommet-montagne-majestueux-dans-paysage-hivernal-paisible-genere-par-ia_188544-15662.jpg",
+      "https://img.freepik.com/photos-gratuite/peinture-lac-montagne-montagne-arriere-plan_188544-9126.jpg",
+      "https://preview.redd.it/national-park-4k-3840x2160-by-a-i-v0-g4crddfnmt9a1.jpg?width=1080&crop=smart&auto=webp&s=4889dfb7d6b7f4bb8dfb24491b3beeeabac18695"
+    ];
+  
+    const nftImages2 = [
+      "https://img.freepik.com/photos-gratuite/sommet-montagne-enneige-sous-ia-generative-majeste-galaxie-etoilee_188544-9650.jpg",
+      "https://img.freepik.com/photos-gratuite/astronomie-du-ciel-nocturne-galactique-science-ont-combine-ia-generative_188544-9656.jpg",
+      "https://img.freepik.com/photos-premium/paysage-planete-fantastique-fond-clair-sombre-ai-generative_332261-2623.jpg?size=626&ext=jpg&ga=GA1.1.632798143.1712707200&semt=ais"
+    ];
+  
+    const nftData1 = nftImages1.map((url, index) => ({
+      title: `Titre NFT ${index + 1}`,
+      text: `Description pour NFT ${index + 1}`,
+      picture: url
+    }));
+  
+    const nftData2 = nftImages2.map((url, index) => ({
+      title: `Titre NFT ${index + 4}`,
+      text: `Description pour NFT ${index + 4}`,
+      picture: url
+    }));
+  
+    const nftsWallet1 = await this.createNFTsForWallet(wallet1, nftData1);
+    const nftsWallet2 = await this.createNFTsForWallet(wallet2, nftData2);
+  
+    return [
+      {
+        wallet: wallet1.classicAddress,
+        seed: wallet1.seed,
+        nfts: nftsWallet1
+      },
+      {
+        wallet: wallet2.classicAddress,
+        seed: wallet2.seed,
+        nfts: nftsWallet2
+      }
+    ];
+  }  
+  
+
   async create(createNftDto: CreateNftDto, token: string) {
     const net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
     const standby_wallet = xrpl.Wallet.fromSeed(
@@ -143,4 +227,14 @@ function hexToString(hex: string): string {
     str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
   }
   return str;
+}
+
+async function getAccount() {
+  let net = 'wss://s.' + process.env.NFT_ENV + '.rippletest.net:51233';
+  const client: xrpl.Client = new xrpl.Client(net);
+  let faucetHost: string | undefined = undefined;
+  await client.connect();
+  const my_wallet: xrpl.Wallet = (await client.fundWallet(null, { faucetHost })).wallet;
+  client.disconnect();
+  return my_wallet;
 }

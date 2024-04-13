@@ -22,7 +22,15 @@ export class NftController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Post()
+  @Get('marketplace')
+  marketplace() {
+    return this.nftService.marketplace();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Post('create')
   create(@Headers() headers: any, @Body() createNftDto: CreateNftDto) {
     const token = headers.authorization?.split(' ')[1];
     return this.nftService.create(createNftDto, token);
@@ -31,7 +39,7 @@ export class NftController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Get()
+  @Get('findAll')
   findAll(@Headers() headers: any) {
     const token = headers.authorization?.split(' ')[1];
     return this.nftService.findAll(token);
@@ -40,18 +48,18 @@ export class NftController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Get(':id')
-  findOne(@Headers() headers: any, @Param('id') id: string) {
+  @Get('findOne')
+  findOne(@Headers() headers: any, @Body() body: { id: string }) {
     const token = headers.authorization?.split(' ')[1];
-    return this.nftService.findOne(token, id);
+    return this.nftService.findOne(token, body.id);
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Delete(':id')
-  remove(@Headers() headers: any, @Param('id') id: string) {
+  @Delete('delete')
+  remove(@Headers() headers: any, @Body() body: { id: string }) {
     const token = headers.authorization?.split(' ')[1];
-    return this.nftService.remove(token, id);
+    return this.nftService.remove(token, body.id);
   }
 }
