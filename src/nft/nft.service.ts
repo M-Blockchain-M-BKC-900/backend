@@ -235,7 +235,7 @@ export class NftService {
     for (const nft of nfts) {
       const offer = await this.findOffer(token, nft.NFT_ID);
       allOffers.push({
-          NFT_ID: nft.NFT_ID,
+          NFT_ID: nft,
           offer: offer ? offer : "No buy offers."
       });
     }
@@ -305,19 +305,14 @@ export class NftService {
     };
 
     const tx = await client.submitAndWait(transactionBlob, { wallet: standby_wallet });
-    console.log("tx result: ", JSON.stringify(tx.result, null, 2));
 
     const nfts = await client.request({
       command: "account_nfts",
       account: standby_wallet.classicAddress  
     });
-    console.log("nfts: ", JSON.stringify(nfts, null, 2));
-
-    // Vérifier les résultats de la transaction
-    // console.log(await this.findOffer('', tx.result.NFTokenID));
 
     client.disconnect();
-    // return tx.result;
+    return tx;
   }
 }
 
