@@ -41,11 +41,13 @@ export class NftService {
       const tx = await client.submitAndWait(transactionJson, {
         wallet: wallet,
       });
-  
-      nfts.push({
-        NFT_ID: tx.result.hash,
-        metadata: nftMetadata
-      });
+
+      if (typeof tx.result.meta !== 'string') {
+        nfts.push({
+            NFT_ID: tx.result.meta?.nftoken_id,
+            metadata: nftMetadata
+          });
+      }
     }
   
     client.disconnect();
