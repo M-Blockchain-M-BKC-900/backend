@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   Headers,
+  Query,
 } from '@nestjs/common';
 import { NftService } from './nft.service';
 import CreateNftDto from './dto/create-nft.dto';
@@ -86,17 +87,22 @@ export class NftController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('createBuyOffer')
-  createBuyOffer(@Headers() headers: any, @Body() body: { wallet_dest: string, NFT_ID: string, price: string }) {
+  createBuyOffer(
+    @Headers() headers: any,
+    @Query('wallet_dest') wallet_dest: string,
+    @Query('NFT_ID') NFT_ID: string,
+    @Query('price') price: string
+  ) {
     const token = headers.authorization?.split(' ')[1];
-    return this.nftService.createBuyOffer(token, body.wallet_dest, body.NFT_ID, body.price);
+    return this.nftService.createBuyOffer(token, wallet_dest, NFT_ID, price);
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('acceptBuyOffer')
-  acceptBuyOffer(@Headers() headers: any, @Body() body: { NFT_OFFER: string }) {
+  acceptBuyOffer(@Headers() headers: any,     @Query('NFT_OFFER') NFT_OFFER: string) {
     const token = headers.authorization?.split(' ')[1];
-    return this.nftService.acceptBuyOffer(token, body.NFT_OFFER);
+    return this.nftService.acceptBuyOffer(token, NFT_OFFER);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import CreateNftDto from './dto/create-nft.dto';
 import * as xrpl from 'xrpl';
-import { NftMetadata } from './entities/nft.entity';
+import { Nft, NftMetadata } from './entities/nft.entity';
 import { JwtService } from '@nestjs/jwt';
 
 interface NftWithMetadata {
